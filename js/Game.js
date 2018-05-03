@@ -3,35 +3,98 @@
 var canvas = document.getElementById("mainCanvas");
 var context = canvas.getContext("2d");
 
+const GAME = 1;
+const WIN = 2;
+const LOSE = 3;
+const PAUSE = 4;
+
 var game = {
     width : canvas.width,
     height : canvas.height,
-	gameOver : false
+	gameOver : false,
+	state : GAME
 }
 
 function updateGame() {
-	if (!game.gameOver) {
-		updateStars();
-		updateEnemies();
-		updatePlayer();
-		updateEnemyBullets();
-		updatePlayerBullets();
+	switch(game.state) {
+		case GAME:
+			updateOngoingGame();
+			break;
+		case WIN:
+
+			break;
+		case LOSE:
+
+			break;
+		case PAUSE:
+
+			break;
+	}
+}
+
+function updateOngoingGame() {
+	updateAction();
+	updateStars();
+	updateEnemies();
+	updatePlayer();
+	updateEnemyBullets();
+	updatePlayerBullets();
+}
+
+function updateAction() {
+	if (37 in keysDown) {
+        movePlayerLeft();
+    }
+	if (39 in keysDown) {
+        movePlayerRight();
+    }
+	if (38 in keysDown) {
+		movePlayerUp();
+	}
+	if (40 in keysDown) {
+		movePlayerDown();
+	}
+	if (32 in keysDown) {
+		playerShoot();
 	}
 }
 
 function drawGame() {
 	context.fillStyle = '#000000';
-    context.fillRect(0, 0, game.width, game.height);
+	context.fillRect(0, 0, game.width, game.height);
 	
-	if (!game.gameOver) {
-		drawStars();
-		drawEnemies();
-		drawPlayer();
-		drawEnemyBullets();
-		drawPlayerBullets();
-	} else {
-		
+	drawOngoingGame();
+	
+	switch(game.state) {
+		case WIN:
+
+			break;
+		case LOSE:
+
+			break;
+		case PAUSE:
+
+			break;
 	}
+}
+
+function drawOngoingGame() {
+	drawStars();
+	drawEnemies();
+	drawPlayer();
+	drawEnemyBullets();
+	drawPlayerBullets();
+	drawScore();
+}
+
+function drawScore() {
+	context.fillStyle = '#ffffff';
+	context.font = "20px Arial";
+	context.fillText("Score: " + player.score, 10, 20);
+}
+
+function drawWonGame() {
+
 }
 
 ////////////////// STARS
@@ -205,7 +268,7 @@ var player = {
     posX : game.width / 2 - 128 / 2,
     posY : game.height - 128 - 10,
     image : playerImage,
-    moveSpeed : 8,
+    moveSpeed : 2,
 	life: 5,
 	damage : 1,
 	shootDelay : 0,
@@ -250,7 +313,7 @@ function drawPlayerBullets() {
 		var bullet = playerBullets[i];
 		
 		context.beginPath();
-		context.arc(bullet.posX, bullet.posY, 12, 0, Math.PI * 2);
+		context.arc(bullet.posX, bullet.posY, bullet.width, 0, Math.PI * 2);
 		context.fillStyle = '#882288';
 		context.fill();
 		context.stroke();
@@ -289,13 +352,14 @@ function createPlayerBullets(player) {
 	var posXX = player.posX + player.width / 2;
 	
 	var bullet = {
-		width : 30,
-		height : 30,
-		speed : 1,
+		width : 8,
+		height : 8,
+		speed : 3,
 		posX : posXX,
 		posY : posYY,
 		alive : true
 	};
+
 	playerBullets.push(bullet);
 }
 
