@@ -1,0 +1,26 @@
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>Cosmo rider</title>
+        <style>
+            * { padding: 0px; margin: 0px; }
+            canvas { background: #000; display: block; margin: 0 auto; height: 100%; }
+            body { background: #00A; }
+        </style>
+    </head>
+    <body>
+        <canvas id="mainCanvas" width="800" height="900"/>
+
+        <script src="js/Enemy.js"></script>
+        <script src="js/Game.js"></script>
+        <script src="js/KeyListener.js"></script>
+        <script>
+            function loop() {
+                    drawGame();
+                    updateGame();
+                }
+
+                setInterval(loop, 1);
+        </script>
+    </body>
+</html>
