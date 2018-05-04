@@ -4,15 +4,15 @@ var canvas = document.getElementById("mainCanvas");
 var context = canvas.getContext("2d");
 
 const GAME = 1;
-const WIN = 2;
-const LOSE = 3;
-const PAUSE = 4;
+const OVER = 2;
+const PAUSE = 3;
+const NOT_STARTED = 4;
 
 var game = {
     width : canvas.width,
     height : canvas.height,
 	gameOver : false,
-	state : GAME
+	state : NOT_STARTED
 }
 
 function updateGame() {
@@ -20,14 +20,11 @@ function updateGame() {
 		case GAME:
 			updateOngoingGame();
 			break;
-		case WIN:
-
+		case NOT_STARTED:
+			updateStartNewGameAction();
 			break;
-		case LOSE:
-
-			break;
-		case PAUSE:
-
+		case OVER:
+			updateStartNewGameAction();
 			break;
 	}
 }
@@ -59,21 +56,36 @@ function updateAction() {
 	}
 }
 
+function updateStartNewGameAction() {
+	if (32 in keysDown) {
+		game.state = GAME
+		player = createPlayer();
+
+		enemyBullets = [];
+		enemies = [];
+
+		createSimpleEnemiesGroup();
+	}
+}
+
 function drawGame() {
 	context.fillStyle = '#000000';
 	context.fillRect(0, 0, game.width, game.height);
 	
-	drawOngoingGame();
+	if (game.state != NOT_STARTED) {
+		drawOngoingGame();
+	}
 	
 	switch(game.state) {
-		case WIN:
-
-			break;
-		case LOSE:
-
+		case OVER:
+			drawGameOver();
 			break;
 		case PAUSE:
+			drawPausedGame();
+			break;
 
+		case NOT_STARTED:
+			drawGameNotStarted();
 			break;
 	}
 }
@@ -93,8 +105,22 @@ function drawScore() {
 	context.fillText("Score: " + player.score, 10, 20);
 }
 
-function drawWonGame() {
+function drawGameOver() {
+	context.fillStyle = '#ffffff';
+	context.font = "30px Arial";
+	context.fillText("Game over with score: " + player.score, game.width / 2 - 130, game.height / 2);
+}
 
+function drawPausedGame() {
+	context.fillStyle = '#ffffff';
+	context.font = "30px Arial";
+	context.fillText("Press P to unpause game!", game.width / 2 - 140, game.height / 2);
+}
+
+function drawGameNotStarted() {
+	context.fillStyle = '#ffffff';
+	context.font = "30px Arial";
+	context.fillText("Press SPACE to start game!", game.width / 2 - 130, game.height / 2);
 }
 
 ////////////////// STARS
@@ -195,6 +221,10 @@ function updateEnemies() {
 		}
 	}
 	enemies = tmp;
+
+	if (enemies.length == 0) {
+
+	}
 }
 
 function drawEnemies() {
@@ -262,27 +292,36 @@ function createEnemyBullets(enemy) {
 var playerImage = new Image();
 playerImage.src = 'img/bgbattleship.png';
 
-var player = {
-    width : 128,
-    height : 128,
-    posX : game.width / 2 - 128 / 2,
-    posY : game.height - 128 - 10,
-    image : playerImage,
-    moveSpeed : 2,
-	life: 5,
-	damage : 1,
-	shootDelay : 0,
-	score : 0
-};
+var player;
+
+function createPlayer() {
+	return {
+		width : 128,
+		height : 128,
+		posX : game.width / 2 - 128 / 2,
+		posY : game.height - 128 - 10,
+		image : playerImage,
+		moveSpeed : 2,
+		life: 5,
+		damage : 1,
+		shootDelay : 0,
+		score : 0
+	};
+}
 
 var playerBullets = [];
 
 function drawPlayer() {
-    context.drawImage(player.image, player.posX, player.posY, player.width, player.height);
+	if (player != null) {
+		context.drawImage(player.image, player.posX, player.posY, player.width, player.height);
+	}
 }
 
 function updatePlayer() {
 	player.shootDelay = Math.max(player.shootDelay - 1, 0);
+	if (player.life <= 0) {
+		game.state = OVER;
+	}
 }
 
 function movePlayerLeft() {
