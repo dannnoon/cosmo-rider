@@ -97,12 +97,23 @@ function drawOngoingGame() {
 	drawEnemyBullets();
 	drawPlayerBullets();
 	drawScore();
+	drawLifeLeft();
 }
 
 function drawScore() {
 	context.fillStyle = '#ffffff';
 	context.font = "20px Arial";
 	context.fillText("Score: " + player.score, 10, 20);
+}
+
+var heartImage = new Image();
+heartImage.src = 'img/heart.png';
+
+function drawLifeLeft() {
+	context.fillStyle = "#ffffff";
+	context.font = "20px Arial";
+	context.fillText("x" + player.life, 250, 20);
+	context.drawImage(heartImage, 220, 5, 20, 20);
 }
 
 function drawGameOver() {
@@ -167,22 +178,26 @@ function drawStars() {
 var enemyImage = new Image();
 enemyImage.src = 'img/enemy1.png';
 
+var enemyTankImage = new Image();
+enemyTankImage.src = 'img/enemy2.png';
+
 var enemies = [];
 
-function createSimpleEnemiesGroup() {
+function createSimpleEnemiesGroup(enemyCreateFunction) {
 	for (var i = 0; i < 5; i++) {
-		var enemy = createSimpleEnemy(((game.width - 20) / 5) * i + 20, -80, 120);
+		var enemy = enemyCreateFunction(((game.width - 20) / 5) * i + 20, -80, 120);
 		enemies.push(enemy);
 	}
 }
 
-createSimpleEnemiesGroup();
+createSimpleEnemiesGroup(createSimpleEnemy);
 
 function createSimpleEnemy(posXX, posYY, distance) {
 	return {
 		life : 1,
 		damage : 1,
 		speed : 1,
+		bulletSpeed : 1,
 		width : 80,
 		height : 80,
 		image : enemyImage,
@@ -190,7 +205,44 @@ function createSimpleEnemy(posXX, posYY, distance) {
 		posY : posYY,
 		distanceToMove : distance,
 		alive : true,
-		shootTicks : Math.floor((Math.random() * 1000) + 500)
+		shootTicks : Math.floor((Math.random() * 1000) + 500),
+		killPoints : 50
+	};
+}
+
+function createFastShooterEnemy(posXX, posYY, distance) {
+	return {
+		life : 1,
+		damage : 1,
+		speed : 2,
+		bulletSpeed : 1,
+		width : 80,
+		height : 80,
+		image : enemyImage,
+		posX : posXX,
+		posY : posYY,
+		distanceToMove : distance,
+		alive : true,
+		shootTicks : Math.floor((Math.random() * 600) + 100),
+		killPoints : 60
+	};
+}
+
+function createTankShooterEnemy(posXX, posYY, distance) {
+	return {
+		life : 3,
+		damage : 2,
+		speed : 1,
+		bulletSpeed : 2,
+		width : 80,
+		height : 80,
+		image : enemyTankImage,
+		posX : posXX,
+		posY : posYY,
+		distanceToMove : distance,
+		alive : true,
+		shootTicks : Math.floor((Math.random() * 1000) + 800),
+		killPoints : 80
 	};
 }
 
@@ -210,7 +262,7 @@ function updateEnemies() {
 		
 		if (enemy.life <= 0) {
 			enemy.alive = false;
-			player.score += 50;
+			player.score += enemy.killPoints;
 		}
 	}
 	
@@ -223,7 +275,18 @@ function updateEnemies() {
 	enemies = tmp;
 
 	if (enemies.length == 0) {
-
+		var enemyTypeGroup = Math.floor(Math.random() * 3);
+		switch(enemyTypeGroup) {
+			case 0: 
+				createSimpleEnemiesGroup(createSimpleEnemiesGroup);
+				break;
+			case 1:
+				createSimpleEnemiesGroup(createFastShooterEnemy);
+				break;
+			case 2:
+				createSimpleEnemiesGroup(createTankShooterEnemy);
+				break;
+		}
 	}
 }
 
@@ -250,7 +313,7 @@ function updateEnemyBullets() {
 		}
 		
 		if (collides(bullet, player)) {
-			player.life -= 1;
+			player.life -= bullet.damage;
 			bullet.alive = false;
 		}
 	}
@@ -278,11 +341,12 @@ function createEnemyBullets(enemy) {
 	var bullet = {
 		width : 20,
 		height : 35,
-		speed : 1,
+		speed : enemy.bulletSpeed,
 		image : bulletImage,
 		posX : posXX,
 		posY : posYY,
-		alive : true
+		alive : true,
+		damage : enemy.damage
 	};
 	enemyBullets.push(bullet);
 }
