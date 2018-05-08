@@ -190,8 +190,6 @@ function createSimpleEnemiesGroup(enemyCreateFunction) {
 	}
 }
 
-createSimpleEnemiesGroup(createSimpleEnemy);
-
 function createSimpleEnemy(posXX, posYY, distance) {
 	return {
 		life : 1,
@@ -275,15 +273,15 @@ function updateEnemies() {
 	enemies = tmp;
 
 	if (enemies.length == 0) {
-		var enemyTypeGroup = Math.floor(Math.random() * 3);
+		var enemyTypeGroup = Math.floor(Math.random() * 3) + 1;
 		switch(enemyTypeGroup) {
-			case 0: 
-				createSimpleEnemiesGroup(createSimpleEnemiesGroup);
-				break;
-			case 1:
-				createSimpleEnemiesGroup(createFastShooterEnemy);
+			case 1: 
+				createSimpleEnemiesGroup(createSimpleEnemy);
 				break;
 			case 2:
+				createSimpleEnemiesGroup(createFastShooterEnemy);
+				break;
+			case 3:
 				createSimpleEnemiesGroup(createTankShooterEnemy);
 				break;
 		}

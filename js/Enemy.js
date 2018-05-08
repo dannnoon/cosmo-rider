@@ -1,1 +1,0 @@
-var enemyTexture = new Image();
